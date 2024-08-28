@@ -7,7 +7,7 @@ const path = require("path");
 
 // Import scraping functions
 const scrapeGoogleScholar = require("./scrapers/googleSiteScraper");
-const scrapeWebOfScience = require("./scrapers/webOfScienceScraper");
+const getPublicationsByIdentifier = require("./scrapers/wosapi");
 
 const dataDir = path.join(__dirname, "data");
 
@@ -23,6 +23,13 @@ if (!fs.existsSync(dataDir)) {
 
 // Define routes
 app.get("/", (req, res) => {
+  fs.rm(dataDir, { recursive: true, force: true }, (err) => {
+    if (err) {
+      console.error(`Error deleting directory ${dataDir}:`, err);
+    } else {
+      console.log(`Directory ${dataDir} deleted successfully.`);
+    }
+  });
   res.send("Happy web scraping");
 });
 
@@ -74,7 +81,7 @@ app.post("/api/scrape/webofscience", async (req, res) => {
   }
 
   try {
-    await scrapeWebOfScience(url);
+    await getPublicationsByIdentifier(url);
     res.status(200).send("Scraping Web of Science profile initiated");
   } catch (error) {
     console.error("Error during scraping:", error);
